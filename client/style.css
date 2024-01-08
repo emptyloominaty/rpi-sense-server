@@ -1,0 +1,40 @@
+﻿html {
+    background-color: #343434;
+    color: #d1d1d1;
+    font-family: Consolas, monospace;
+}
+
+/*div {
+    border:1px solid #fff !important;
+}*/
+
+canvas, body, html {
+    padding: 0;
+    margin: 0;
+}
+
+* {
+    /*overflow: hidden;*/
+    user-select: none;
+}
+
+#header {
+    display:flex;
+    justify-content: center;
+
+}
+
+#currentValues {
+    display: flex;
+    justify-content: center;
+}
+
+#pressureH, #temperatureH, #humidityH {
+    display: flex;
+    justify-content: center;
+    padding: 5px 15px 5px 15px;
+    border: 1px solid rgba(255,255,255,0.5);
+    font-size: 30px;
+    width: 200px;
+}
+
