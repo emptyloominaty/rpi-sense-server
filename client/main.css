@@ -1,0 +1,19 @@
+﻿html {
+    background-color: #343434;
+    color: #d1d1d1;
+    font-family: Consolas, monospace;
+}
+
+/*div {
+    border:1px solid #fff !important;
+}*/
+
+canvas, body, html {
+    padding: 0;
+    margin: 0;
+}
+
+* {
+    overflow: hidden;
+    user-select: none;
+}
