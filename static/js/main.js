@@ -5,5 +5,3 @@ let run = function () {
     elements.humidityHVal.textContent = current.humidity + " %"
 
 }
-
-setInterval(run, 10000);
