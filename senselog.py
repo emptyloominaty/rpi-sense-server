@@ -1,3 +1,4 @@
+import os
 import sched
 import time
 import random
@@ -39,7 +40,14 @@ def store_json(storeData):
     json_data = json.dumps(storeData, indent=4)
     
     current_date = datetime.now().strftime('%Y-%m-%d')
-    filename = f"{current_date}.json"
+    
+    folder_name = 'data'
+    
+    if not os.path.exists(folder_name):
+        os.makedirs(folder_name)
+    
+
+    filename = f"{folder_name}/{current_date}.json"
     
     with open(filename, 'w') as file:
         file.write(json_data)
