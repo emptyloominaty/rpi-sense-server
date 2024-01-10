@@ -1,6 +1,6 @@
 let options = {
     average: true,
-    maxValues: 200
+    maxValues: 500
 }
 
 let elements = {
@@ -12,6 +12,9 @@ let elements = {
     chartT: document.getElementById("chartT"),
     chartH: document.getElementById("chartH"),
     chartP: document.getElementById("chartP"),
+    statusText: document.getElementById("statusText"),
+    Time: document.getElementById("Time"),
+    Ping: document.getElementById("Ping"),
 }
 
 let jsonData = {
@@ -27,7 +30,9 @@ let jsonData = {
 let current = {
     temperature: 22,
     pressure: 1000,
-    humidity: 47
+    humidity: 47,
+    time: 1704704812,
+    c: 0
 }
 
 let temperatureChart

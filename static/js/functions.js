@@ -1,9 +1,5 @@
 let processData = function (originalData, chunkSize, average) {
-
-
-
     let filteredData = [];
-
     let sum = 0
     let count = 0
 
@@ -22,8 +18,6 @@ let processData = function (originalData, chunkSize, average) {
             count = 0
         }
     }
-
-
 
     return filteredData;
 }
@@ -73,4 +67,27 @@ let updateCharts = function (process = false) {
     humidityChart.data.datasets[0].data = jsonData.humidity
     humidityChart.data.labels = jsonData.time
     humidityChart.update()
+}
+
+
+let fetchValues = function () {
+    let ping0 = performance.now()
+    fetch('/get_values')
+        .then(response => response.json())
+        .then(data => {
+
+            current.temperature = data.temperature
+            current.humidty = data.humidity
+            current.pressure = data.pressure
+            current.time = data.time
+            current.c = data.c
+
+            current.ping = (performance.now() - ping0) / 1000
+
+            elements.Ping.textContent = Math.round(current.ping * 100) / 100 + "ms"
+            elements.Time.textContent = 
+
+            console.log(current.c+". "+" ping: " + Math.round(current.ping*100)/100 + " | time: " + current.time)
+        })
+        .catch(error => console.error('Error fetching values:', error));
 }
