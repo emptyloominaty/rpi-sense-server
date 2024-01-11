@@ -5,70 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>rpi-sense</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
-
-
-    <script defer>
-        let statusText = document.getElementById("statusText")
-
-        let currentJson = {}
-
-        let jsonDataFiles = {}
-
-        statusText.textContent("Downloading current values...")
-        run()
-
-        statusText.textContent("Downloading today's data...")
-
-        fetch('/get_data')
-            .then(response => response.json())
-            .then(data => {
-                currentJson = data
-
-            })
-            .catch(error => console.error('Error fetching JSON data:', error));
-
-        statusText.textContent("Downloading json files...")
-
-        let iii = 0
-        fetch('/list_json_files') // Fetch list of JSON files
-            .then(response => response.json())
-            .then(files => {
-                statusText.textContent("Downloading 0/" + files.length + " json files...")
-
-                files.forEach(file => {
-                    fetch(`data/${file}`) // Fetch each JSON file
-                        .then(response => response.json())
-                        .then(data => {
-                            iii++
-                            statusText.textContent("Downloading "+iii+"/" + files.length + " json files...")
-
-                            let nameString = `${file}`
-                            jsonDataFiles[nameString] = data; // Process data
-                        })
-                        .catch(error => console.error(`Error fetching ${file}:`, error));
-                });
-            })
-            .catch(error => console.error('Error fetching list of JSON files:', error));
-
-        setTimeout(init, 500);
-        let mainSetInterval = setInterval(run, 10000);
-
-        console.log('jsonData = jsonDataFiles["2024-01-09.json"]; updateCharts(true)')
-
-        statusText.textContent("")
-    </script>
-
-
-    <script src="{{ url_for('static', filename='js/lib/chart.umd.min.js') }}" defer></script>
-    <script src="{{ url_for('static', filename='js/functions.js') }}" defer></script>
-    <script src="{{ url_for('static', filename='js/init.js') }}" defer></script>
-    <script src="{{ url_for('static', filename='js/charts.js') }}" defer></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
 </head>
 <body>
     <div id="header">
         <div id="status">
-            <span id="statusText">
+            <span id="statusText" onclick="openWindow()">
                 ...
             </span>
         </div>
@@ -90,10 +31,10 @@
             </div>
             <div id="timePing">
                 <span id="Time">
-                    
+
                 </span>
                 <span id="Ping">
-                    
+
                 </span>
             </div>
         </div>
@@ -103,5 +44,108 @@
         <div style="width: 95vw; height: 28vh; max-height: 28vh; margin: 5px; padding: 3px; "><canvas id="chartH" "></canvas></div>
         <div style="width: 95vw; height: 28vh; max-height: 28vh; margin: 5px; padding: 3px; "><canvas id="chartP" "></canvas></div>
     </div>
+
+    <div id="window">
+    </div>
+
+    <script src="{{ url_for('static', filename='js/lib/chart.umd.min.js') }}" async></script>
+    <script src="{{ url_for('static', filename='js/functions.js') }}" async></script>
+    <script src="{{ url_for('static', filename='js/init.js') }}" async></script>
+    <script src="{{ url_for('static', filename='js/charts.js') }}" async></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}" async></script>
+
+    <script defer>
+        let statusText = document.getElementById("statusText")
+        let currentJson = {}
+        let jsonDataFiles = {}
+
+        statusText.textContent = "Downloading today's data..."
+
+        fetch('/get_data')
+            .then(response => response.json())
+            .then(data => {
+                currentJson = data
+
+                statusText.textContent = "Downloading current values..."
+                setTimeout(run, 500);
+
+            })
+            .catch(error => console.error('Error fetching JSON data:', error));
+
+        statusText.textContent = "Downloading json files..."
+
+        let iii = 0
+        /*fetch('/list_json_files')
+            .then(response => response.json())
+            .then(files => {
+                statusText.textContent = "Downloading 0/" + files.length + " json files..."
+
+                files.forEach(file => {
+                    fetch(`data/${file}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            iii++
+                            statusText.textContent = "Downloading " + iii + "/" + files.length + " json files..."
+
+                            if (iii == files.length) {
+                                setTimeout(init, 500);
+                                let mainSetInterval = setInterval(run, 10000);
+                                statusText.textContent = "..."
+                            }
+
+                            let nameString = `${file}`
+                            jsonDataFiles[nameString] = data;
+                        })
+                        .catch(error => console.error(`Error fetching ${file}:`, error));
+                });
+            })
+            .catch(error => console.error('Error fetching list of JSON files:', error));
+            */
+
+        fetch('/list_json_files')
+            .then(response => response.json())
+            .then(files => {
+                statusText.textContent = "Downloading 0/" + files.length + " json files...";
+                downloadFilesSequentially(files, 0);
+            })
+            .catch(error => console.error('Error fetching list of JSON files:', error));
+
+        function downloadFilesSequentially(files, index) {
+            if (index >= files.length) {
+                setTimeout(init, 500);
+                let mainSetInterval = setInterval(run, 10000);
+                statusText.textContent = "...";
+                return;
+            }
+
+            let file = files[index];
+
+            fetch(`data/${file}`)
+                .then(response => response.json())
+                .then(data => {
+                    iii++;
+                    statusText.textContent = "Downloading " + iii + "/" + files.length + " json files...";
+
+                    let nameString = `${file}`;
+                    jsonDataFiles[nameString] = data;
+
+     
+                    downloadFilesSequentially(files, index + 1);
+                })
+                .catch(error => {
+                    console.error(`Error fetching ${file}:`, error);
+
+  
+                    downloadFilesSequentially(files, index + 1);
+                });
+        }
+
+        console.log('jsonData = jsonDataFiles["2024-01-09.json"]; updateCharts(true)')
+
+
+    </script>
+
+
+
 </body>
 </html>

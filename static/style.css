@@ -38,3 +38,40 @@ canvas, body, html {
     width: 200px;
 }
 
+#timePing, #status {
+    display:flex;
+    flex-direction: column;
+    justify-content:center;
+    padding: 5px 15px 5px 15px;
+    border: 1px solid rgba(255,255,255,0.5);
+    width: 200px;
+}
+
+#timePing span, #status span{
+    text-align: center;
+}
+
+#window {
+    position: fixed;
+    z-index: 100;
+    top: 4.62vh;
+    left: 2.6vw;
+    background-color: #342b1b;
+    color: #FFF;
+    overflow: auto;
+    border-radius: 3px;
+    min-width:300px;
+}
+
+.windowHeader {
+    font-size: 1.3vw;
+    padding: 0.3vw;
+    margin-bottom: 0.5vw;
+    display: flex;
+    justify-content: space-between;
+}
+
+.windowBody {
+    font-size: 0.72vw;
+    padding: 0.5vw;
+}

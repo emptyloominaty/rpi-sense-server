@@ -3,6 +3,14 @@ let options = {
     maxValues: 500
 }
 
+if (localStorage.getItem("maxValues")) {
+    options.maxValues = localStorage.getItem("maxValues")
+}
+
+let show = "day" //day, week, month, year
+let optionsWindow = false
+
+
 let elements = {
     app: document.getElementById("app"),
     header: document.getElementById("header"),
@@ -15,6 +23,7 @@ let elements = {
     statusText: document.getElementById("statusText"),
     Time: document.getElementById("Time"),
     Ping: document.getElementById("Ping"),
+    window: document.getElementById("window"),
 }
 
 let jsonData = {
@@ -30,7 +39,7 @@ let jsonData = {
 let current = {
     temperature: 22,
     pressure: 1000,
-    humidity: 47,
+    humidity: 50,
     time: 1704704812,
     c: 0
 }
@@ -40,7 +49,7 @@ let pressureChart
 let humidityChart
 
 let init = function () {
-    jsonData = currentJson;
+    jsonData = JSON.parse(JSON.stringify(currentJson));  
 
 
     processJson(jsonData, getChunkSize(jsonData), options.average);
@@ -64,6 +73,7 @@ let init = function () {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                pointStyle: false
             }
         }
     );
@@ -89,7 +99,9 @@ let init = function () {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                pointStyle: false
             }
+          
         }
     );
 
@@ -113,6 +125,7 @@ let init = function () {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                pointStyle: false
             }
         }
     );

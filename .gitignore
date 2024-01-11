@@ -107,3 +107,6 @@ pnpm-debug.log*
 /dist_electron
 
 .vsconfig
+
+data/
+/data/
