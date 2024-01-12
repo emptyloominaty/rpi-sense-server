@@ -13,9 +13,10 @@ timeApp = 1704756570
 c = 0
 cd = 0
 
+runStoreFunction = False
+
 
 def resetData():
-
     return {
     "startTime": int(time.time()),
     "timer": 10,
@@ -62,6 +63,7 @@ def update_values(sc):
     global c
     global cd
     global data
+    global runStoreFunction
 
     timeApp = int(time.time())   
     c = c + 1
@@ -83,9 +85,14 @@ def update_values(sc):
         if cd<=0:
             c = 0
             store_json(data)
-            resetData()
-            cd = 4 #120
+            data = resetData()
+            cd = 120
 
+    if runStoreFunction:
+        store_json(data)
+        data = resetData()
+        runStoreFunction = False
+    
     sc.enter(10, 1, update_values, (sc,))
 
 

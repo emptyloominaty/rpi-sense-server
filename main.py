@@ -14,8 +14,6 @@ app = Flask(__name__)
 
 @app.route('/get_values')
 def get_values():
-    
-
     testTime = int(time.time())   
     date_object = datetime.fromtimestamp(testTime)
     print(str(date_object.hour)+":"+str(date_object.minute)+":"+str(date_object.second)+" cd:"+str(senselog.cd)+" c:"+str(senselog.c))
@@ -27,6 +25,12 @@ def get_values():
         "time": senselog.timeApp,
         "c": senselog.c
     })
+
+@app.route('/store_data', methods=['POST'])
+def stop_logging():
+    senselog.runStoreFunction = True
+    return jsonify({'status': 'success', 'message': 'Temperature logging stored'})
+
 
 @app.route('/get_data')
 def get_data():

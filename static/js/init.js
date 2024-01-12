@@ -49,10 +49,10 @@ let pressureChart
 let humidityChart
 
 let init = function () {
-    jsonData = JSON.parse(JSON.stringify(currentJson));  
+    jsonData = JSON.parse(JSON.stringify(currentJson))
 
 
-    processJson(jsonData, getChunkSize(jsonData), options.average);
+    processJson(jsonData, getChunkSize(jsonData), options.average)
 
     temperatureChart = new Chart(
         elements.chartT,
@@ -76,7 +76,7 @@ let init = function () {
                 pointStyle: false
             }
         }
-    );
+    )
 
 
 
@@ -103,7 +103,7 @@ let init = function () {
             }
           
         }
-    );
+    )
 
 
     humidityChart = new Chart(
@@ -128,7 +128,7 @@ let init = function () {
                 pointStyle: false
             }
         }
-    );
+    )
 }
 
 

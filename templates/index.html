@@ -67,10 +67,10 @@
                 currentJson = data
 
                 statusText.textContent = "Downloading current values..."
-                setTimeout(run, 500);
+                setTimeout(run, 500)
 
             })
-            .catch(error => console.error('Error fetching JSON data:', error));
+            .catch(error => console.error('Error fetching JSON data:', error))
 
         statusText.textContent = "Downloading json files..."
 
@@ -88,56 +88,56 @@
                             statusText.textContent = "Downloading " + iii + "/" + files.length + " json files..."
 
                             if (iii == files.length) {
-                                setTimeout(init, 500);
-                                let mainSetInterval = setInterval(run, 10000);
+                                setTimeout(init, 500)
+                                let mainSetInterval = setInterval(run, 10000)
                                 statusText.textContent = "..."
                             }
 
                             let nameString = `${file}`
-                            jsonDataFiles[nameString] = data;
+                            jsonDataFiles[nameString] = data
                         })
-                        .catch(error => console.error(`Error fetching ${file}:`, error));
-                });
+                        .catch(error => console.error(`Error fetching ${file}:`, error))
+                })
             })
-            .catch(error => console.error('Error fetching list of JSON files:', error));
+            .catch(error => console.error('Error fetching list of JSON files:', error))
             */
 
         fetch('/list_json_files')
             .then(response => response.json())
             .then(files => {
-                statusText.textContent = "Downloading 0/" + files.length + " json files...";
-                downloadFilesSequentially(files, 0);
+                statusText.textContent = "Downloading 0/" + files.length + " json files..."
+                downloadFilesSequentially(files, 0)
             })
-            .catch(error => console.error('Error fetching list of JSON files:', error));
+            .catch(error => console.error('Error fetching list of JSON files:', error))
 
         function downloadFilesSequentially(files, index) {
             if (index >= files.length) {
-                setTimeout(init, 500);
-                let mainSetInterval = setInterval(run, 10000);
-                statusText.textContent = "...";
-                return;
+                setTimeout(init, 500)
+                let mainSetInterval = setInterval(run, 10000)
+                statusText.textContent = "..."
+                return
             }
 
-            let file = files[index];
+            let file = files[index]
 
             fetch(`data/${file}`)
                 .then(response => response.json())
                 .then(data => {
-                    iii++;
-                    statusText.textContent = "Downloading " + iii + "/" + files.length + " json files...";
+                    iii++
+                    statusText.textContent = "Downloading " + iii + "/" + files.length + " json files..."
 
-                    let nameString = `${file}`;
-                    jsonDataFiles[nameString] = data;
+                    let nameString = `${file}`
+                    jsonDataFiles[nameString] = data
 
      
-                    downloadFilesSequentially(files, index + 1);
+                    downloadFilesSequentially(files, index + 1)
                 })
                 .catch(error => {
-                    console.error(`Error fetching ${file}:`, error);
+                    console.error(`Error fetching ${file}:`, error)
 
   
-                    downloadFilesSequentially(files, index + 1);
-                });
+                    downloadFilesSequentially(files, index + 1)
+                })
         }
 
         console.log('jsonData = jsonDataFiles["2024-01-09.json"]; updateCharts(true)')
