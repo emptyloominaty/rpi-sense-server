@@ -3,6 +3,7 @@ import os
 import senselog
 import time
 
+
 from flask import Flask, jsonify, render_template, send_from_directory
 from threading import Thread
 
@@ -38,7 +39,7 @@ def get_data():
 
 @app.route('/list_json_files')
 def list_json_files():
-    files = [file for file in os.listdir("data") if file.endswith('.json')]
+    files = [file for file in os.listdir("/home/user/data") if file.endswith('.json')]
     return jsonify(files)
 
 @app.route('/data/<path:filename>')

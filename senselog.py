@@ -4,7 +4,7 @@ import time
 import random
 import json
 from datetime import datetime
-
+from sense_hat import SenseHat
 
 temperature = 20.5
 humidity = 50
@@ -14,7 +14,7 @@ c = 0
 cd = 0
 
 runStoreFunction = False
-
+sense = SenseHat()
 
 def resetData():
     return {
@@ -42,7 +42,7 @@ def store_json(storeData):
     
     current_date = datetime.now().strftime('%Y-%m-%d')
     
-    folder_name = 'data'
+    folder_name = '/home/user/data'
     
     if not os.path.exists(folder_name):
         os.makedirs(folder_name)
@@ -71,12 +71,13 @@ def update_values(sc):
         cd -= 1 
 
     #Random data
-    temperature = random.uniform(16, 26)
-    humidity = random.randint(30, 70)
-    pressure = random.randint(920, 1080)
+    #temperature = random.uniform(16, 26)
+    #humidity = random.randint(30, 70)
+    #pressure = random.randint(920, 1080)
 
-    #TODO: get data from sense hat
-
+    humidity = sense.get_humidity()
+    temperature = sense.get_temperature()
+    pressure = sense.get_pressure()
 
     add_values(temperature,humidity,pressure,timeApp)
     
