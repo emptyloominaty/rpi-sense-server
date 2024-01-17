@@ -55,7 +55,7 @@ if __name__ == '__main__':
      script_thread = Thread(target=start_logging)
      script_thread.daemon = True
      script_thread.start()
-     app.run(host='0.0.0.0', debug=True) # host='0.0.0.0'  ????
+     app.run(host='0.0.0.0', debug=True)
 
 
         
