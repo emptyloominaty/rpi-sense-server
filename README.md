@@ -1,4 +1,6 @@
-pip install flask
-sudo apt-get install sense-hat
+* pip install flask
+* sudo apt-get install sense-hat
 
-main.py
+* /home/user
+
+* python main.py
