@@ -59,14 +59,14 @@
         let currentJson = {}
         let jsonDataFiles = {}
 
-        statusText.textContent = "Downloading today's data..."
+        statusText.textContent = "Downloading current values..."
 
         fetch('/get_data')
             .then(response => response.json())
             .then(data => {
                 currentJson = data
 
-                statusText.textContent = "Downloading current values..."
+
                 setTimeout(run, 500)
 
             })
@@ -75,33 +75,6 @@
         statusText.textContent = "Downloading json files..."
 
         let iii = 0
-        /*fetch('/list_json_files')
-            .then(response => response.json())
-            .then(files => {
-                statusText.textContent = "Downloading 0/" + files.length + " json files..."
-
-                files.forEach(file => {
-                    fetch(`data/${file}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            iii++
-                            statusText.textContent = "Downloading " + iii + "/" + files.length + " json files..."
-
-                            if (iii == files.length) {
-                                setTimeout(init, 500)
-                                let mainSetInterval = setInterval(run, 10000)
-                                statusText.textContent = "..."
-                            }
-
-                            let nameString = `${file}`
-                            jsonDataFiles[nameString] = data
-                        })
-                        .catch(error => console.error(`Error fetching ${file}:`, error))
-                })
-            })
-            .catch(error => console.error('Error fetching list of JSON files:', error))
-            */
-
         fetch('/list_json_files')
             .then(response => response.json())
             .then(files => {
@@ -139,13 +112,6 @@
                     downloadFilesSequentially(files, index + 1)
                 })
         }
-
-        console.log('jsonData = jsonDataFiles["2024-01-09.json"]; updateCharts(true)')
-
-
     </script>
-
-
-
 </body>
 </html>

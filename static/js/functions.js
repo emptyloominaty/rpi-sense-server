@@ -10,7 +10,7 @@ let processData = function (originalData, chunkSize, average) {
         nullVal = false
         sum += originalData[i]
 
-        if (originalData[i] == null) { //TODO TEST
+        if (originalData[i] == null) {
             nullVal = true 
             nullSegment = true
         }
@@ -60,13 +60,13 @@ let getChunkSize = function (jsonData) {
     }
 }
 
-let updateCharts = function (process = false,type2 = "day") {
+let updateCharts = function (process = false,type2 = "day", offset = true) {
 
     if (process) {
         processJson(jsonData, getChunkSize(jsonData), options.average,type2)
     }
 
-    if (options.tempOffset!==0) {
+    if (options.tempOffset!==0 && offset) {
         for (let i = 0; i<jsonData.temperature.length; i++) {
             if (jsonData.temperature[i]!==null && jsonData.temperature[i]!==0) {
                 jsonData.temperature[i] -= options.tempOffset
@@ -108,7 +108,17 @@ let fetchValues = function () {
             const hours = String(date.getHours()).padStart(2, '0')
             const minutes = String(date.getMinutes()).padStart(2, '0')
             const seconds = String(date.getSeconds()).padStart(2, '0')
-            
+
+            if (currentData) {
+                jsonData.temperature.push(current.temperature-options.tempOffset)
+                jsonData.humidity.push(current.humidity)
+                jsonData.pressure.push(current.pressure)
+                jsonData.time.push(convertTime(current.time,"day"))
+                if (!starting) {
+                    updateCharts(false, "day", false)
+                }
+            }
+
 
             elements.temperatureHVal.textContent = (current.temperature-options.tempOffset).toFixed(1) + " C"
             elements.pressureHVal.textContent = (current.pressure / 1000).toFixed(3) + " bar"
@@ -239,6 +249,7 @@ function changeFile(selectElement) {
     let selectedJsonData = ""
     let type2 = "day"
     if (selectedFilename !== "Current Data") {
+        currentData = false
         selectedJsonData = jsonDataFiles[selectedFilename]
         if (show == "day") {
             jsonData = JSON.parse(JSON.stringify(selectedJsonData))
@@ -392,6 +403,7 @@ function changeFile(selectElement) {
         }
     } else {
         jsonData = JSON.parse(JSON.stringify(currentJson))
+        currentData = true
     }
 
     updateCharts(true,type2)

@@ -51,8 +51,11 @@ let current = {
 let temperatureChart
 let pressureChart
 let humidityChart
+let currentData = true
+let starting = true
 
 let init = function () {
+    starting = false
     jsonData = JSON.parse(JSON.stringify(currentJson))
 
 
@@ -85,7 +88,10 @@ let init = function () {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                pointStyle: false
+                pointStyle: false/*,
+                animation: {
+                    duration: 0
+                }*/
             }
         }
     )
@@ -111,7 +117,10 @@ let init = function () {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                pointStyle: false
+                pointStyle: false/*,
+                animation: {
+                    duration: 0
+                }*/
             }
           
         }
@@ -137,7 +146,10 @@ let init = function () {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                pointStyle: false
+                pointStyle: false/*,
+                animation: {
+                    duration: 0
+                }*/
             }
         }
     )
