@@ -66,6 +66,14 @@ let updateCharts = function (process = false,type2 = "day") {
         processJson(jsonData, getChunkSize(jsonData), options.average,type2)
     }
 
+    if (options.tempOffset!==0) {
+        for (let i = 0; i<jsonData.temperature.length; i++) {
+            if (jsonData.temperature[i]!==null && jsonData.temperature[i]!==0) {
+                jsonData.temperature[i] -= options.tempOffset
+            }
+        }
+    }
+
 
     temperatureChart.data.datasets[0].data = jsonData.temperature
     temperatureChart.data.labels = jsonData.time
@@ -102,9 +110,9 @@ let fetchValues = function () {
             const seconds = String(date.getSeconds()).padStart(2, '0')
             
 
-            elements.temperatureHVal.textContent = current.temperature.toFixed(1) + " C"
+            elements.temperatureHVal.textContent = (current.temperature-options.tempOffset).toFixed(1) + " C"
             elements.pressureHVal.textContent = (current.pressure / 1000).toFixed(3) + " bar"
-            elements.humidityHVal.textContent = current.humidity + " %"
+            elements.humidityHVal.textContent = current.humidity.toFixed(0) + " %"
 
             elements.Time.textContent = `${hours}:${minutes}:${seconds}`
         })
@@ -175,8 +183,13 @@ let storeLoggingData = function () {
 
 let openWindow = function () {
     let htmlStr = "<div class='windowBody'> <div class='windowHeader'><span> </span> <div onclick='closeWindow()'>x</div></div>"
-    htmlStr += '<button onclick="storeLoggingData()">Store</button>'
-    htmlStr += '<div><input type="range" onchange="options.maxValues = Number(this.value); document.getElementById(\'maxValuesText\').textContent = Number(this.value);" step="50" value="' + options.maxValues + '" min="100" max="4000">' +
+
+    htmlStr += '<button onclick="storeLoggingData()">Store</button><br>'
+
+    htmlStr += '<label for="numberInput">Temp Offset: -</label>' +
+        '  <input type="number" id="numberInput" onchange="options.tempOffset = Number(this.value);" step="0.1" value="options.tempOffset"><br>'
+    htmlStr += '<div><label for="maxValuesInput">Max Values: </label>'
+    htmlStr += '<input id="maxValuesInput" type="range" onchange="options.maxValues = Number(this.value); document.getElementById(\'maxValuesText\').textContent = Number(this.value);" step="50" value="' + options.maxValues + '" min="100" max="4000">' +
         '<span id="maxValuesText">' + options.maxValues + '</span></div>'
 
     let optionsArray = []
@@ -195,6 +208,8 @@ let openWindow = function () {
 
     htmlStr += "</div>"
     elements.window.innerHTML = htmlStr
+    document.getElementById("numberInput").value = options.tempOffset
+
 }
 
 let sortJson = function () {
@@ -387,4 +402,6 @@ function changeFile(selectElement) {
 let closeWindow = function () {
     elements.window.innerHTML = ""
     localStorage.setItem("maxValues", options.maxValues)
+    localStorage.setItem("tempOffset", options.tempOffset)
+
 }

@@ -1,10 +1,14 @@
 let options = {
     average: true,
-    maxValues: 500
+    maxValues: 500,
+    tempOffset: 0.8
 }
 
 if (localStorage.getItem("maxValues")) {
     options.maxValues = localStorage.getItem("maxValues")
+}
+if (localStorage.getItem("tempOffset")) {
+    options.tempOffset = localStorage.getItem("tempOffset")
 }
 
 let show = "day" //day, week, month, year
@@ -53,6 +57,14 @@ let init = function () {
 
 
     processJson(jsonData, getChunkSize(jsonData), options.average)
+
+    if (options.tempOffset!==0) {
+        for (let i = 0; i<jsonData.temperature.length; i++) {
+            if (jsonData.temperature[i]!==null && jsonData.temperature[i]!==0) {
+                jsonData.temperature[i] -= options.tempOffset
+            }
+        }
+    }
 
     temperatureChart = new Chart(
         elements.chartT,
