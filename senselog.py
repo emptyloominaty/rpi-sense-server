@@ -56,6 +56,7 @@ def store_json(storeData):
     
 
 def update_values(sc):
+    start_time = time.time() * 1000  
     global temperature
     global humidity
     global pressure
@@ -94,8 +95,10 @@ def update_values(sc):
         store_json(data)
         data = resetData()
         runStoreFunction = False
+
+    elapsed_time = (time.time() * 1000) - start_time
     
-    sc.enter(10, 1, update_values, (sc,))
+    sc.enter(10-elapsed_time, 1, update_values, (sc,))
 
 
 def start_update():
