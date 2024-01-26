@@ -1,7 +1,7 @@
 function downloadAllFiles() {
     iii = 0
-    statusText.textContent = "Downloading 0/" + files.length + " json files..."
-    downloadFilesSequentially(files, 0)
+    statusText.textContent = "Downloading 0/" + filesList.length + " json files..."
+    downloadFilesSequentially(filesList, 0)
     
 }
 

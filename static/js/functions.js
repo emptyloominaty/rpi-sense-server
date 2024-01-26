@@ -197,11 +197,11 @@ let storeLoggingData = function () {
 let openWindow = function () {
     let htmlStr = "<div class='windowBody'> <div class='windowHeader'><span> </span> <div onclick='closeWindow()'>x</div></div>"
 
-    htmlStr += '<button onclick="downloadAllFiles()">Download All Data ('+fileList.length+')</button><br>'
+    htmlStr += '<button onclick="downloadAllFiles()">Download All Data ('+filesList.length+')</button><br>'
 
     htmlStr += '<button onclick="storeLoggingData()">Store</button><br>'
 
-    htmlStr += '<button onclick="options.last24h = !options.last24h; document.getElementById("last24h").textContent = options.last24h  ">Current Data shows last 24h</button> <span id="last24h">' + options.last24h + '</span> <br>'
+    htmlStr += '<button onclick="options.last24h = !options.last24h; document.getElementById(`last24h`).textContent = options.last24h  ">Current Data shows last 24h</button> <span id="last24h">' + options.last24h + '</span> <br>'
 
     htmlStr += '<label for="numberInput">Temp Offset: -</label>' +
         '  <input type="number" id="numberInput" onchange="options.tempOffset = Number(this.value);" step="0.1" value="options.tempOffset"><br>'
@@ -231,12 +231,12 @@ let openWindow = function () {
     let yearsArray = ['<option value="Current Data">Current Data</option>']
 
     for (const [key, value] of Object.entries(dates)) {
-        yearsArray.push('<option value="' + dates[key] + '">' + dates[key] + '</option>')
+        yearsArray.push('<option value="' + key + '">' + key + '</option>')
     }
  
-    htmlStr += '<select id="selectYear" onchange="changeYear(this)">' + yearsArray.join('') + '</select>'
-    htmlStr += '<select id="selectMonth" onchange="changeMonth(this)"></select>'
-    htmlStr += '<select id="selectDay" onchange="changeDay(this)"></select>'
+    htmlStr += '<select id="selectYear" onchange="changeYear(this.value)">' + yearsArray.join('') + '</select>'
+    htmlStr += '<select id="selectMonth" onchange="changeMonth(this.value)"></select>'
+    htmlStr += '<select id="selectDay" onchange="changeDay(this.value)"></select>'
     htmlStr += '<select onchange="selectedTimeFrame = this.value"> <option value="current-data">Current Data</option> <option value="day">day</option> <option value="week">week</option> <option value="month">month</option> <option value="year">year</option>  </select >'
     htmlStr += '<button onclick="loadData()" >Confirm</button>'
 
@@ -256,56 +256,71 @@ let changeYear = function(year) {
     let selectElement = document.getElementById("selectMonth")
     let monthsArray = ['<option value="-">-</option>']
     for (const [key, value] of Object.entries(dates[year])) {
-        monthsArray.push('<option value="' + value[key] + '">' + value[key] + '</option>')
+        monthsArray.push('<option value="' + key + '">' + key + '</option>')
     }
     selectElement.innerHTML = monthsArray.join('');
 }
 let changeMonth = function(month) {
     monthSelected = month
-    let selectElement = document.getElementById("selectMonth")
+    let selectElement = document.getElementById("selectDay")
     let daysArray = ['<option value="-">-</option>']
-    for (const [key, value] of Object.entries(dates[month])) {
-        daysArray.push('<option value="' + value[key] + '">' + value[key] + '</option>')
+    for (const [key, value] of Object.entries(dates[yearSelected][month])) {
+        daysArray.push('<option value="' + key + '">' + key + '</option>')
     }
-    selectElement.innerHTML = monthsArray.join('');
+    selectElement.innerHTML = daysArray.join('');
 }
 
 let changeDay = function (day) {
     daySelected = day
 }
 
+let getCurrentDay = function () {
+    const currentDate = new Date()
+    const currentDay = currentDate.getDate()
+    return  currentDay.toString().padStart(2, '0')
+}
+let getCurrentMonth = function () {
+    const currentDate = new Date()
+    const currentMonth = currentDate.getMonth() + 1
+    return  currentMonth.toString().padStart(2, '0')
+}
+
+let getCurrentYear = function() {
+    const currentDate = new Date();
+    return currentDate.getFullYear();
+}
+
 let loadData = async function () {
+    currentData = false
     if (selectedTimeFrame === "current-data") {
+        daySelected = getCurrentDay()
+        monthSelected = getCurrentMonth()
+        yearSelected = getCurrentYear()
+        currentData = true
         if (options.last24h) {
             let filesArray = []
-            for (let i = 0; i < dates[yearSelected][monthSelected][daySelected].length; i++) {
-                filesArray.push(dates[yearSelected][monthSelected][daySelected][i])
+
+            if (dates[yearSelected][monthSelected][daySelected]) {
+                for (let i = 0; i < dates[yearSelected][monthSelected][daySelected].length; i++) {
+                    filesArray.push(dates[yearSelected][monthSelected][daySelected][i])
+                }
             }
             if (daySelected > 1) {
-                for (let i = 0; i < dates[yearSelected][monthSelected][daySelected - 1].length; i++) {
-                    filesArray.push(dates[yearSelected][monthSelected][daySelected - 1][i]);
+                if (dates[yearSelected][monthSelected][convertDayString(daySelected,-1)] !== undefined) {
+                    for (let i = 0; i < dates[yearSelected][monthSelected][convertDayString(daySelected,-1)].length; i++) {
+                        filesArray.push(dates[yearSelected][monthSelected][convertDayString(daySelected,-1)][i]);
+                    }
                 }
             } else {
                 let previousMonth = (parseInt(monthSelected) - 2 + 12) % 12 + 1;
                 let lastDayOfPreviousMonth = new Date(parseInt(yearSelected), parseInt(monthSelected) - 1, 0).getDate();
-                for (let i = 0; i < dates[yearSelected][previousMonth][lastDayOfPreviousMonth].length; i++) {
-                    filesArray.push(dates[yearSelected][previousMonth][lastDayOfPreviousMonth][i]);
+                if (dates[yearSelected][previousMonth][convertDayString(lastDayOfPreviousMonth)] !== undefined) {
+                    for (let i = 0; i < dates[yearSelected][previousMonth][convertDayString(lastDayOfPreviousMonth)].length; i++) {
+                        filesArray.push(dates[yearSelected][previousMonth][convertDayString(lastDayOfPreviousMonth)][i]);
+                    }
                 }
             }
             await concatArrays(filesArray)
-            let remove = 0;
-            for (let i = 0; i < jsonData.time; i++) {
-                if (jsonData.time < Date.now() - 86400) {
-                    remove = i
-                }
-            }
-            if (remove != 0) {
-                jsonData.temperature.splice(0, remove);
-                jsonData.humidity.splice(0, remove);
-                jsonData.pressure.splice(0, remove);
-                jsonData.time.splice(0, remove);
-            }
-
         } else {
             jsonData = JSON.parse(JSON.stringify(currentJson))
         }
@@ -319,9 +334,9 @@ let loadData = async function () {
     } else if (selectedTimeFrame === "week") {
         let filesArray = []
         for (let j = 0; j < 7; j++) {
-            if (dates[yearSelected][monthSelected][daySelected + j] !== undefined) {
-                for (let i = 0; i < dates[yearSelected][monthSelected][daySelected + j].length; i++) {
-                    filesArray.push(dates[yearSelected][monthSelected][daySelected + j][i])
+            if (dates[yearSelected][monthSelected][convertDayString(daySelected,j)] !== undefined) {
+                for (let i = 0; i < dates[yearSelected][monthSelected][convertDayString(daySelected,j)].length; i++) {
+                    filesArray.push(dates[yearSelected][monthSelected][convertDayString(daySelected,j)][i])
                 }
             }
         }
@@ -337,7 +352,7 @@ let loadData = async function () {
     } else if (selectedTimeFrame === "year") {
         let filesArray = []
         for (const [key, month] of Object.entries(dates[yearSelected])) {
-            for (const [key, day] of Object.entries(dates[yearSelected][month])) {
+            for (const [key2, day] of Object.entries(dates[yearSelected][convertMonthString(key)])) {
                 for (let i = 0; i < day.length; i++) {
                     filesArray.push(day[i])
                 }
@@ -349,6 +364,13 @@ let loadData = async function () {
     updateCharts(true, selectedTimeFrame)
 }
 
+function convertMonthString(monthString) {
+    return parseInt(monthString, 10).toString().padStart(2, '0')
+}
+function convertDayString(monthString,add = 0) {
+    return (parseInt(monthString, 10)+add).toString().padStart(2, '0')
+}
+
 let concatArrays = async function (filesArray) {
     concatenatedArrayT = []
     concatenatedArrayH = []
@@ -358,18 +380,43 @@ let concatArrays = async function (filesArray) {
         if (jsonDataFiles[filesArray[i]] === undefined) {
             await downloadFile(filesArray[i],i,filesArray.length)
         }
-
         concatenatedArrayT = concatenatedArrayT.concat(jsonDataFiles[filesArray[i]].temperature)
         concatenatedArrayH = concatenatedArrayH.concat(jsonDataFiles[filesArray[i]].humidity)
         concatenatedArrayP = concatenatedArrayP.concat(jsonDataFiles[filesArray[i]].pressure)
         concatenatedArrayTT = concatenatedArrayTT.concat(jsonDataFiles[filesArray[i]].time)
     }
     statusText.textContent = "..."
-    jsonData = JSON.parse(JSON.stringify(selectedJsonData))
+    if (currentData) {
+        jsonData = JSON.parse(JSON.stringify(currentJson))
+        concatenatedArrayT = concatenatedArrayT.concat(currentJson.temperature)
+        concatenatedArrayH = concatenatedArrayH.concat(currentJson.humidity)
+        concatenatedArrayP = concatenatedArrayP.concat(currentJson.pressure)
+        concatenatedArrayTT = concatenatedArrayTT.concat(currentJson.time)
+    } else {
+        jsonData = JSON.parse(JSON.stringify(jsonDataFiles[filesArray[0]]))
+    }
+
+
     jsonData.temperature = concatenatedArrayT
     jsonData.humidity = concatenatedArrayH
     jsonData.pressure = concatenatedArrayP
     jsonData.time = concatenatedArrayTT
+
+    if (currentData) {
+        let remove = 0;
+        for (let i = 0; i < jsonData.time.length; i++) {
+            if (jsonData.time[i] < ((Date.now()/1000) - 86400)) {
+                remove = i
+            }
+        }
+        if (remove != 0) {
+            jsonData.temperature.splice(0, remove);
+            jsonData.humidity.splice(0, remove);
+            jsonData.pressure.splice(0, remove);
+            jsonData.time.splice(0, remove);
+        }
+    }
+
     sortJson()
 }
 

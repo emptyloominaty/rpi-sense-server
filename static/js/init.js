@@ -12,7 +12,7 @@ if (localStorage.getItem("tempOffset")) {
     options.tempOffset = localStorage.getItem("tempOffset")
 }
 if (localStorage.getItem("last24h")) {
-    options.tempOffset = localStorage.getItem("last24h")
+    options.last24h = localStorage.getItem("last24h")
 }
 
 let show = "day" //day, week, month, year
