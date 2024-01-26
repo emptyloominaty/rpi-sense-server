@@ -60,7 +60,10 @@ let getChunkSize = function (jsonData) {
     }
 }
 
-let updateCharts = function (process = false,type2 = "day", offset = true) {
+let updateCharts = function (process = false, type2 = "day", offset = true) {
+    if (type2 === "current-data") {
+        type2 = "day"
+    }
 
     if (process) {
         processJson(jsonData, getChunkSize(jsonData), options.average,type2)
@@ -194,7 +197,11 @@ let storeLoggingData = function () {
 let openWindow = function () {
     let htmlStr = "<div class='windowBody'> <div class='windowHeader'><span> </span> <div onclick='closeWindow()'>x</div></div>"
 
+    htmlStr += '<button onclick="downloadAllFiles()">Download All Data ('+fileList.length+')</button><br>'
+
     htmlStr += '<button onclick="storeLoggingData()">Store</button><br>'
+
+    htmlStr += '<button onclick="options.last24h = !options.last24h; document.getElementById("last24h").textContent = options.last24h  ">Current Data shows last 24h</button> <span id="last24h">' + options.last24h + '</span> <br>'
 
     htmlStr += '<label for="numberInput">Temp Offset: -</label>' +
         '  <input type="number" id="numberInput" onchange="options.tempOffset = Number(this.value);" step="0.1" value="options.tempOffset"><br>'
@@ -202,25 +209,170 @@ let openWindow = function () {
     htmlStr += '<input id="maxValuesInput" type="range" onchange="options.maxValues = Number(this.value); document.getElementById(\'maxValuesText\').textContent = Number(this.value);" step="50" value="' + options.maxValues + '" min="100" max="4000">' +
         '<span id="maxValuesText">' + options.maxValues + '</span></div>'
 
-    let optionsArray = []
-    Object.keys(jsonDataFiles).forEach((filename) => {
-        optionsArray.push('<option value="' + filename + '">' + filename + '</option>')
-    })
-    optionsArray.push('<option value="Current Data">Current Data</option>')
+    dates = {}
 
-    optionsArray.reverse()
+    // Y
+    for (let i = 0; i < filesList.length; i++) {
+        dates[filesList[i].split('-')[0]] = {}
+    }
+    // M
+    for (let i = 0; i < filesList.length; i++) {
+        dates[filesList[i].split('-')[0]][filesList[i].split('-')[1]] = {}
+    }
+    // D
+    for (let i = 0; i < filesList.length; i++) {
+        let day = filesList[i].split('-')[2]
+        if (dates[filesList[i].split('-')[0]][filesList[i].split('-')[1]][day] === undefined) {
+            dates[filesList[i].split('-')[0]][filesList[i].split('-')[1]][day] = []
+        }
+        dates[filesList[i].split('-')[0]][filesList[i].split('-')[1]][day].push(filesList[i])
+    }
 
-    htmlStr += '<select name="jsonDataDropdown" id="jsonDataDropdown" onchange="changeFile(this)">' + optionsArray.join('') + '</select>'
+    let yearsArray = ['<option value="Current Data">Current Data</option>']
 
-    htmlStr += '<select name="dayDropdown" id="dayDropdown" onchange="show = this.value"> <option value="day">file</option> <option value="multifile-day">day</option> <option value="week">week</option> <option value="month">month</option> <option value="year">year</option>  </select >'
-
-
+    for (const [key, value] of Object.entries(dates)) {
+        yearsArray.push('<option value="' + dates[key] + '">' + dates[key] + '</option>')
+    }
+ 
+    htmlStr += '<select id="selectYear" onchange="changeYear(this)">' + yearsArray.join('') + '</select>'
+    htmlStr += '<select id="selectMonth" onchange="changeMonth(this)"></select>'
+    htmlStr += '<select id="selectDay" onchange="changeDay(this)"></select>'
+    htmlStr += '<select onchange="selectedTimeFrame = this.value"> <option value="current-data">Current Data</option> <option value="day">day</option> <option value="week">week</option> <option value="month">month</option> <option value="year">year</option>  </select >'
+    htmlStr += '<button onclick="loadData()" >Confirm</button>'
 
     htmlStr += "</div>"
     elements.window.innerHTML = htmlStr
     document.getElementById("numberInput").value = options.tempOffset
-
 }
+
+let dates = {}
+let yearSelected = "2024"
+let monthSelected = "01"
+let daySelected = "01"
+let selectedTimeFrame = "current-data"
+
+let changeYear = function(year) {
+    yearSelected = year
+    let selectElement = document.getElementById("selectMonth")
+    let monthsArray = ['<option value="-">-</option>']
+    for (const [key, value] of Object.entries(dates[year])) {
+        monthsArray.push('<option value="' + value[key] + '">' + value[key] + '</option>')
+    }
+    selectElement.innerHTML = monthsArray.join('');
+}
+let changeMonth = function(month) {
+    monthSelected = month
+    let selectElement = document.getElementById("selectMonth")
+    let daysArray = ['<option value="-">-</option>']
+    for (const [key, value] of Object.entries(dates[month])) {
+        daysArray.push('<option value="' + value[key] + '">' + value[key] + '</option>')
+    }
+    selectElement.innerHTML = monthsArray.join('');
+}
+
+let changeDay = function (day) {
+    daySelected = day
+}
+
+let loadData = async function () {
+    if (selectedTimeFrame === "current-data") {
+        if (options.last24h) {
+            let filesArray = []
+            for (let i = 0; i < dates[yearSelected][monthSelected][daySelected].length; i++) {
+                filesArray.push(dates[yearSelected][monthSelected][daySelected][i])
+            }
+            if (daySelected > 1) {
+                for (let i = 0; i < dates[yearSelected][monthSelected][daySelected - 1].length; i++) {
+                    filesArray.push(dates[yearSelected][monthSelected][daySelected - 1][i]);
+                }
+            } else {
+                let previousMonth = (parseInt(monthSelected) - 2 + 12) % 12 + 1;
+                let lastDayOfPreviousMonth = new Date(parseInt(yearSelected), parseInt(monthSelected) - 1, 0).getDate();
+                for (let i = 0; i < dates[yearSelected][previousMonth][lastDayOfPreviousMonth].length; i++) {
+                    filesArray.push(dates[yearSelected][previousMonth][lastDayOfPreviousMonth][i]);
+                }
+            }
+            await concatArrays(filesArray)
+            let remove = 0;
+            for (let i = 0; i < jsonData.time; i++) {
+                if (jsonData.time < Date.now() - 86400) {
+                    remove = i
+                }
+            }
+            if (remove != 0) {
+                jsonData.temperature.splice(0, remove);
+                jsonData.humidity.splice(0, remove);
+                jsonData.pressure.splice(0, remove);
+                jsonData.time.splice(0, remove);
+            }
+
+        } else {
+            jsonData = JSON.parse(JSON.stringify(currentJson))
+        }
+        currentData = true
+    } else if (selectedTimeFrame === "day") {
+        let filesArray = []
+        for (let i = 0; i < dates[yearSelected][monthSelected][daySelected].length; i++) {
+            filesArray.push(dates[yearSelected][monthSelected][daySelected][i])
+        }
+        await concatArrays(filesArray)
+    } else if (selectedTimeFrame === "week") {
+        let filesArray = []
+        for (let j = 0; j < 7; j++) {
+            if (dates[yearSelected][monthSelected][daySelected + j] !== undefined) {
+                for (let i = 0; i < dates[yearSelected][monthSelected][daySelected + j].length; i++) {
+                    filesArray.push(dates[yearSelected][monthSelected][daySelected + j][i])
+                }
+            }
+        }
+        await concatArrays(filesArray)
+    } else if (selectedTimeFrame === "month") {
+        let filesArray = []
+        for (const [key, value] of Object.entries(dates[yearSelected][monthSelected])) {
+            for (let i = 0; i < value.length; i++) {
+                filesArray.push(value[i])
+            }
+        }
+        await concatArrays(filesArray)
+    } else if (selectedTimeFrame === "year") {
+        let filesArray = []
+        for (const [key, month] of Object.entries(dates[yearSelected])) {
+            for (const [key, day] of Object.entries(dates[yearSelected][month])) {
+                for (let i = 0; i < day.length; i++) {
+                    filesArray.push(day[i])
+                }
+            }
+        }
+        await concatArrays(filesArray)
+    }
+
+    updateCharts(true, selectedTimeFrame)
+}
+
+let concatArrays = async function (filesArray) {
+    concatenatedArrayT = []
+    concatenatedArrayH = []
+    concatenatedArrayP = []
+    concatenatedArrayTT = []
+    for (let i = 0; i < filesArray.length; i++) {
+        if (jsonDataFiles[filesArray[i]] === undefined) {
+            await downloadFile(filesArray[i],i,filesArray.length)
+        }
+
+        concatenatedArrayT = concatenatedArrayT.concat(jsonDataFiles[filesArray[i]].temperature)
+        concatenatedArrayH = concatenatedArrayH.concat(jsonDataFiles[filesArray[i]].humidity)
+        concatenatedArrayP = concatenatedArrayP.concat(jsonDataFiles[filesArray[i]].pressure)
+        concatenatedArrayTT = concatenatedArrayTT.concat(jsonDataFiles[filesArray[i]].time)
+    }
+    statusText.textContent = "..."
+    jsonData = JSON.parse(JSON.stringify(selectedJsonData))
+    jsonData.temperature = concatenatedArrayT
+    jsonData.humidity = concatenatedArrayH
+    jsonData.pressure = concatenatedArrayP
+    jsonData.time = concatenatedArrayTT
+    sortJson()
+}
+
 
 let sortJson = function () {
     // Combine arrays into an array of objects
@@ -243,177 +395,9 @@ let sortJson = function () {
     fillGapsJson()
 }
 
-
-function changeFile(selectElement) {
-    let selectedFilename = selectElement.value
-    let selectedJsonData = ""
-    let type2 = "day"
-    if (selectedFilename !== "Current Data") {
-        currentData = false
-        selectedJsonData = jsonDataFiles[selectedFilename]
-        if (show == "day") {
-            jsonData = JSON.parse(JSON.stringify(selectedJsonData))
-
-        } else if (show == "multifile-day") {
-            let dayArray = []
-            let parts = selectedFilename.split("-")
-            let year = parseInt(parts[0])
-            let month = parseInt(parts[1])
-            let day = parseInt(parts[2])
-            Object.keys(jsonDataFiles).forEach(function (key) {
-                let parts2 = key.split("-")
-                let year2 = parseInt(parts2[0])
-                let month2 = parseInt(parts2[1])
-                let day2 = parseInt(parts2[2])
-
-                if (year2 == year && month2 == month && day2 == day) {
-                    dayArray.push(key)
-                }
-            })
-
-            concatenatedArrayT = []
-            concatenatedArrayH = []
-            concatenatedArrayP = []
-            concatenatedArrayTT = []
-            for (let i = 0; i < dayArray.length; i++) {
-                concatenatedArrayT = concatenatedArrayT.concat(jsonDataFiles[dayArray[i]].temperature)
-                concatenatedArrayH = concatenatedArrayH.concat(jsonDataFiles[dayArray[i]].humidity)
-                concatenatedArrayP = concatenatedArrayP.concat(jsonDataFiles[dayArray[i]].pressure)
-                concatenatedArrayTT = concatenatedArrayTT.concat(jsonDataFiles[dayArray[i]].time)
-            }
-
-            jsonData = JSON.parse(JSON.stringify(selectedJsonData))
-            jsonData.temperature = concatenatedArrayT
-            jsonData.humidity = concatenatedArrayH
-            jsonData.pressure = concatenatedArrayP
-            jsonData.time = concatenatedArrayTT
-
-            sortJson()
-
-        } else if (show == "week") {
-            type2 = "week"
-            let weekArray = []
-            let parts = selectedFilename.split("-")
-            let year = parseInt(parts[0])
-            let month = parseInt(parts[1])
-            let day = parseInt(parts[2])
-            let dayMax = day+6
-            Object.keys(jsonDataFiles).forEach(function (key) {
-                let parts2 = key.split("-")
-                let year2 = parseInt(parts2[0])
-                let month2 = parseInt(parts2[1])
-                let day2 = parseInt(parts2[2])
-
-                if (year2 == year && month2 == month && (day2 >= day && day2 <= dayMax)  ) {
-                    weekArray.push(key)
-                }
-            })
-
-            concatenatedArrayT = []
-            concatenatedArrayH = []
-            concatenatedArrayP = []
-            concatenatedArrayTT = []
-            for (let i = 0; i < weekArray.length; i++) {
-                concatenatedArrayT = concatenatedArrayT.concat(jsonDataFiles[weekArray[i]].temperature)
-                concatenatedArrayH = concatenatedArrayH.concat(jsonDataFiles[weekArray[i]].humidity)
-                concatenatedArrayP = concatenatedArrayP.concat(jsonDataFiles[weekArray[i]].pressure)
-                concatenatedArrayTT = concatenatedArrayTT.concat(jsonDataFiles[weekArray[i]].time)
-            }
-
-            jsonData = JSON.parse(JSON.stringify(selectedJsonData))
-            jsonData.temperature = concatenatedArrayT
-            jsonData.humidity = concatenatedArrayH
-            jsonData.pressure = concatenatedArrayP
-            jsonData.time = concatenatedArrayTT
-
-            sortJson()
-
-        } else if (show == "month") {
-            type2 = "month"
-            let parts = selectedFilename.split("-")
-            let year = parseInt(parts[0])
-            let month = parseInt(parts[1])
-
-            let monthArray = []
-           
-            Object.keys(jsonDataFiles).forEach(function (key) {
-                let parts2 = key.split("-")
-                let year2 = parseInt(parts2[0])
-                let month2 = parseInt(parts2[1])
- 
-                if (year2 == year && month2 == month) {
-                    monthArray.push(key)
-                }
-            })
-
-            concatenatedArrayT = []
-            concatenatedArrayH = []
-            concatenatedArrayP = []
-            concatenatedArrayTT = []
-            for (let i = 0; i < monthArray.length; i++) {
-                concatenatedArrayT = concatenatedArrayT.concat(jsonDataFiles[monthArray[i]].temperature)
-                concatenatedArrayH = concatenatedArrayH.concat(jsonDataFiles[monthArray[i]].humidity)
-                concatenatedArrayP = concatenatedArrayP.concat(jsonDataFiles[monthArray[i]].pressure)
-                concatenatedArrayTT = concatenatedArrayTT.concat(jsonDataFiles[monthArray[i]].time)
-            }
-
-            jsonData = JSON.parse(JSON.stringify(selectedJsonData))
-            jsonData.temperature = concatenatedArrayT
-            jsonData.humidity = concatenatedArrayH
-            jsonData.pressure = concatenatedArrayP
-            jsonData.time = concatenatedArrayTT
-
-            sortJson()
-
-
-
-        } else if (show == "year") {
-            type2 = "year"
-            let parts = selectedFilename.split("-")
-            let year = parseInt(parts[0])
-            let yearArray = []
-
-            Object.keys(jsonDataFiles).forEach(function (key) {
-                let parts2 = key.split("-")
-                let year2 = parseInt(parts2[0])
-
-                if (year2 == year) {
-                    yearArray.push(key)
-                }
-            })
-
-            concatenatedArrayT = []
-            concatenatedArrayH = []
-            concatenatedArrayP = []
-            concatenatedArrayTT = []
-            for (let i = 0; i < yearArray.length; i++) {
-                concatenatedArrayT = concatenatedArrayT.concat(jsonDataFiles[yearArray[i]].temperature)
-                concatenatedArrayH = concatenatedArrayH.concat(jsonDataFiles[yearArray[i]].humidity)
-                concatenatedArrayP = concatenatedArrayP.concat(jsonDataFiles[yearArray[i]].pressure)
-                concatenatedArrayTT = concatenatedArrayTT.concat(jsonDataFiles[yearArray[i]].time)
-            }
-
-            jsonData = JSON.parse(JSON.stringify(selectedJsonData))
-            jsonData.temperature = concatenatedArrayT
-            jsonData.humidity = concatenatedArrayH
-            jsonData.pressure = concatenatedArrayP
-            jsonData.time = concatenatedArrayTT
-
-            sortJson()
-        }
-    } else {
-        jsonData = JSON.parse(JSON.stringify(currentJson))
-        currentData = true
-    }
-
-    updateCharts(true,type2)
-   
-}
-
-
 let closeWindow = function () {
     elements.window.innerHTML = ""
     localStorage.setItem("maxValues", options.maxValues)
     localStorage.setItem("tempOffset", options.tempOffset)
-
+    localStorage.setItem("last24h", options.last24h)
 }

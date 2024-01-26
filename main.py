@@ -28,9 +28,15 @@ def get_values():
     })
 
 @app.route('/store_data', methods=['POST'])
-def stop_logging():
+def store_data():
     senselog.runStoreFunction = True
     return jsonify({'status': 'success', 'message': 'Temperature logging stored'})
+
+#TODO
+@app.route('/toggle_led', methods=['POST'])
+def toggle_led():
+    senselog.toggleLED = True
+    return jsonify({'status': 'success', 'message': 'led'})
 
 
 @app.route('/get_data')

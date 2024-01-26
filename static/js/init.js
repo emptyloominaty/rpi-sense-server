@@ -1,7 +1,8 @@
 let options = {
     average: true,
     maxValues: 500,
-    tempOffset: 0.8
+    tempOffset: 0.8,
+    last24h: true
 }
 
 if (localStorage.getItem("maxValues")) {
@@ -9,6 +10,9 @@ if (localStorage.getItem("maxValues")) {
 }
 if (localStorage.getItem("tempOffset")) {
     options.tempOffset = localStorage.getItem("tempOffset")
+}
+if (localStorage.getItem("last24h")) {
+    options.tempOffset = localStorage.getItem("last24h")
 }
 
 let show = "day" //day, week, month, year
@@ -55,6 +59,8 @@ let currentData = true
 let starting = true
 
 let init = function () {
+    statusText.textContent = "..."
+
     starting = false
     jsonData = JSON.parse(JSON.stringify(currentJson))
 

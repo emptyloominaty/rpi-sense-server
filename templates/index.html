@@ -58,6 +58,8 @@
         let statusText = document.getElementById("statusText")
         let currentJson = {}
         let jsonDataFiles = {}
+        let mainSetInterval; 
+        let filesList = []
 
         statusText.textContent = "Downloading current values..."
 
@@ -65,53 +67,25 @@
             .then(response => response.json())
             .then(data => {
                 currentJson = data
-
-
-                setTimeout(run, 500)
-
+                statusText.textContent = "Waiting..."
+                setTimeout(init, 500)
+                setTimeout(run, 700)
+                mainSetInterval = setInterval(run, 10000)
             })
             .catch(error => console.error('Error fetching JSON data:', error))
 
-        statusText.textContent = "Downloading json files..."
+      
 
-        let iii = 0
+        
         fetch('/list_json_files')
             .then(response => response.json())
             .then(files => {
-                statusText.textContent = "Downloading 0/" + files.length + " json files..."
-                downloadFilesSequentially(files, 0)
+                filesList = files
             })
             .catch(error => console.error('Error fetching list of JSON files:', error))
 
-        function downloadFilesSequentially(files, index) {
-            if (index >= files.length) {
-                setTimeout(init, 500)
-                let mainSetInterval = setInterval(run, 10000)
-                statusText.textContent = "..."
-                return
-            }
 
-            let file = files[index]
 
-            fetch(`data/${file}`)
-                .then(response => response.json())
-                .then(data => {
-                    iii++
-                    statusText.textContent = "Downloading " + iii + "/" + files.length + " json files..."
-
-                    let nameString = `${file}`
-                    jsonDataFiles[nameString] = data
-
-     
-                    downloadFilesSequentially(files, index + 1)
-                })
-                .catch(error => {
-                    console.error(`Error fetching ${file}:`, error)
-
-  
-                    downloadFilesSequentially(files, index + 1)
-                })
-        }
     </script>
 </body>
 </html>

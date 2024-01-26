@@ -10,6 +10,7 @@ temperature = 20.5
 humidity = 50
 pressure = 980
 timeApp = 1704756570
+toggleLED = False
 c = 0
 cd = 0
 
@@ -40,7 +41,7 @@ def add_values(t,h,p,tt):
 def store_json(storeData):
     json_data = json.dumps(storeData)
     
-    current_date = datetime.now().strftime('%Y-%m-%d')
+    current_date = datetime.now().strftime('%Y-%m-%d-%H%M')
     
     folder_name = '/home/user/data'
     
@@ -48,7 +49,7 @@ def store_json(storeData):
         os.makedirs(folder_name)
     
     random_number = random.randint(10000, 999999)
-    filename = f"{folder_name}/{current_date}-{random_number}.json"
+    filename = f"{folder_name}/{current_date}{random_number}.json"
     
     with open(filename, 'w') as file:
         file.write(json_data)
@@ -82,7 +83,7 @@ def update_values(sc):
     add_values(temperature,humidity,pressure,timeApp)
     
     date_object = datetime.fromtimestamp(timeApp)
-    if c>=8640 or (date_object.hour == 23 and date_object.minute == 59): #23:59
+    if c>=2880 or (date_object.hour == 23 and date_object.minute == 59): #23:59
         if cd<=0:
             c = 0
             store_json(data)
