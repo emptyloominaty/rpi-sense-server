@@ -158,7 +158,6 @@ let convertTime = function (time, type) {
 let fillGapsJson = function () {
     let prevTime = jsonData.startTime
     for (let i = 0; i < jsonData.time.length; i++) {
-
         if (jsonData.time[i] > prevTime + 19) {
             let delta = jsonData.time[i] - prevTime
             let a = delta / jsonData.timer
@@ -170,7 +169,8 @@ let fillGapsJson = function () {
                 jsonData.pressure.splice(i + j, 0, null)
                 jsonData.humidity.splice(i + j, 0, null)
             }
-            i = i + (a-1)
+
+            i = i + (count-1)
         }
 
         prevTime = jsonData.time[i]
