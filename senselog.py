@@ -107,5 +107,5 @@ def start_update():
     scheduler.run()
     return
 
-if __name__ == "__main__":
-    start_update()
+#if __name__ == "__main__":
+#    start_update()
