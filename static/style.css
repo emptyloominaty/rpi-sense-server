@@ -75,3 +75,86 @@ canvas, body, html {
     font-size: 0.72vw;
     padding: 0.5vw;
 }
+
+#status:hover {
+    background-color: rgba(255,255,255,0.2);
+}
+
+
+button {
+    border-radius: 1px;
+    color: #ffffff;
+    font-size: 15px;
+    background: #463924;
+    padding: 5px 10px 5px 10px;
+    text-decoration: none;
+    border: solid rgba(255, 228, 95, 0.09) 1px;
+    margin: 2px;
+}
+
+button:hover {
+    background: #56462c;
+}
+
+input[type=number] {
+    margin-top:2px;
+    border-width: 1px;
+    border-color: rgba(255, 228, 95, 0.09);
+    background-color: #463924;
+    color: #ffffff;
+    border-style: solid;
+    border-radius: 0px;
+    box-shadow: 0px 0px 5px rgba(66,66,66,.75);
+    text-shadow: 0px 0px 5px rgba(66,66,66,.75);
+}
+
+input[type=number]:focus {
+    outline:none;
+}
+
+
+
+
+
+input[type=range] {
+    -webkit-appearance: none;
+    margin: 10px 0;
+}
+input[type=range]:focus {
+    outline: none;
+}
+input[type=range]::-webkit-slider-runnable-track {
+    height: 10px;
+    cursor: pointer;
+    background: #463924;
+    border-radius: 0px;
+    border: 1px solid rgba(255, 228, 95, 0.09);
+}
+input[type=range]::-webkit-slider-thumb {
+    border: 1px solid rgba(255, 228, 95, 0.09);
+    height: 17px;
+    width: 13px;
+    border-radius: 1px;
+    background: #eaeaea;
+    cursor: pointer;
+    -webkit-appearance: none;
+    margin-top: -4.5px;
+}
+input[type=range]:focus::-webkit-slider-runnable-track {
+    background: #463924;
+}
+input[type=range]::-moz-range-track {
+    height: 10px;
+    cursor: pointer;
+    background: #463924;
+    border-radius: 0px;
+    border: 1px solid rgba(255, 228, 95, 0.09);
+}
+input[type=range]::-moz-range-thumb {
+    border: 1px solid rgba(255, 228, 95, 0.09);
+    height: 17px;
+    width: 13px;
+    border-radius: 1px;
+    background: #eaeaea;
+    cursor: pointer;
+}

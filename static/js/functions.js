@@ -158,6 +158,7 @@ let convertTime = function (time, type) {
 let fillGapsJson = function () {
     let prevTime = jsonData.startTime
     for (let i = 0; i < jsonData.time.length; i++) {
+ 
         if (jsonData.time[i] > prevTime + 19) {
             let delta = jsonData.time[i] - prevTime
             let a = delta / jsonData.timer
@@ -293,9 +294,10 @@ let getCurrentYear = function() {
 let loadData = async function () {
     currentData = false
     if (selectedTimeFrame === "current-data") {
-        daySelected = getCurrentDay()
-        monthSelected = getCurrentMonth()
-        yearSelected = getCurrentYear()
+		daySelected = getCurrentDay().toString().padStart(2, '0');
+		monthSelected = getCurrentMonth().toString().padStart(2, '0');
+		yearSelected = getCurrentYear().toString();
+		
         currentData = true
         if (options.last24h) {
             let filesArray = []
@@ -401,7 +403,7 @@ let concatArrays = async function (filesArray) {
     jsonData.humidity = concatenatedArrayH
     jsonData.pressure = concatenatedArrayP
     jsonData.time = concatenatedArrayTT
-
+	
     if (currentData) {
         let remove = 0;
         for (let i = 0; i < jsonData.time.length; i++) {
