@@ -146,11 +146,11 @@ let convertTime = function (time, type) {
     if (type == "day") {
         return `${hours}:${minutes}`
     } else if (type == "week") {
-        return `${day}.${month}. ${hours}`
+        return `${day}.${month}. ${hours}:${minutes}`
     } else if (type == "month") {
-        return `${day}.${month}.`
+        return `${day}.${month}. ${hours}`
     } else if (type == "year") {
-        return `${month}`
+        return `${day}.${month}`
     }
     
 }
