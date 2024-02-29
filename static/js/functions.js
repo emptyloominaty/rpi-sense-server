@@ -77,7 +77,6 @@ let updateCharts = function (process = false, type2 = "day", offset = true) {
         }
     }
 
-
     temperatureChart.data.datasets[0].data = jsonData.temperature
     temperatureChart.data.labels = jsonData.time
     temperatureChart.data.datasets[0].borderColor = getTempGradient()
@@ -90,6 +89,15 @@ let updateCharts = function (process = false, type2 = "day", offset = true) {
 
     humidityChart.data.datasets[0].data = jsonData.humidity
     humidityChart.data.labels = jsonData.time
+    humidityChart.data.datasets[0].borderColor = getHumidityGradient()
+    humidityChart.update()
+}
+
+let updateGradients = function() {
+    temperatureChart.data.datasets[0].borderColor = getTempGradient()
+    temperatureChart.update()
+    pressureChart.data.datasets[0].borderColor = getPressureGradient()
+    pressureChart.update()
     humidityChart.data.datasets[0].borderColor = getHumidityGradient()
     humidityChart.update()
 }

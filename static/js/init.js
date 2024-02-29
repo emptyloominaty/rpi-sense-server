@@ -159,6 +159,11 @@ let init = function () {
             }
         }
     )
+
+    function onResize() {
+        updateGradients()
+    }
+    window.onresize = onResize
 }
 
 
