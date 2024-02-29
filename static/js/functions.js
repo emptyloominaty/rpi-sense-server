@@ -80,15 +80,82 @@ let updateCharts = function (process = false, type2 = "day", offset = true) {
 
     temperatureChart.data.datasets[0].data = jsonData.temperature
     temperatureChart.data.labels = jsonData.time
+    temperatureChart.data.datasets[0].borderColor = getTempGradient()
     temperatureChart.update()
 
     pressureChart.data.datasets[0].data = jsonData.pressure
     pressureChart.data.labels = jsonData.time
+    pressureChart.data.datasets[0].borderColor = getPressureGradient()
     pressureChart.update()
 
     humidityChart.data.datasets[0].data = jsonData.humidity
     humidityChart.data.labels = jsonData.time
+    humidityChart.data.datasets[0].borderColor = getHumidityGradient()
     humidityChart.update()
+}
+
+let getTempGradient = function() {
+    let filteredData = jsonData.temperature.filter(value => value !== null && value !== 0);
+    let minValue = Math.min(...filteredData)
+    let maxValue = Math.max(...filteredData)
+    let range = maxValue - minValue
+
+    let gradient = elements.chartT.getContext("2d").createLinearGradient(0, temperatureChart.chartArea.bottom, 0, temperatureChart.chartArea.top)
+
+    let blueStop = Math.max((18 - minValue) / range, 0)
+    let lightblueStop = Math.min(Math.max((20 - minValue) / range, blueStop), 1)
+    let greenStop = Math.min(Math.max((22 - minValue) / range, lightblueStop), 1)
+    let yellowStop = Math.min(Math.max((23 - minValue) / range, greenStop), 1)
+    let redStop = Math.min((maxValue - minValue) / range, 1)
+
+    gradient.addColorStop(blueStop, '#4284f5')
+    gradient.addColorStop(lightblueStop, '#42a4f5')
+    gradient.addColorStop(greenStop, 'green')
+    gradient.addColorStop(yellowStop, 'yellow')
+    gradient.addColorStop(redStop, 'red')
+    return gradient
+}
+let getHumidityGradient = function() {
+    let filteredData = jsonData.humidity.filter(value => value !== null && value !== 0);
+    let minValue = Math.min(...filteredData)
+    let maxValue = Math.max(...filteredData)
+    let range = maxValue - minValue
+
+    let gradient = elements.chartH.getContext("2d").createLinearGradient(0, humidityChart.chartArea.bottom, 0, humidityChart.chartArea.top)
+
+    let blueStop = Math.max((10 - minValue) / range, 0)
+    let lightblueStop = Math.min(Math.max((30 - minValue) / range, blueStop), 1)
+    let greenStop = Math.min(Math.max((50 - minValue) / range, lightblueStop), 1)
+    let yellowStop = Math.min(Math.max((70 - minValue) / range, greenStop), 1)
+    let redStop = Math.min((maxValue - minValue) / range, 1)
+
+    gradient.addColorStop(blueStop, '#4284f5')
+    gradient.addColorStop(lightblueStop, '#42a4f5')
+    gradient.addColorStop(greenStop, 'green')
+    gradient.addColorStop(yellowStop, 'yellow')
+    gradient.addColorStop(redStop, 'red')
+    return gradient
+}
+let getPressureGradient = function() {
+    let filteredData = jsonData.pressure.filter(value => value !== null && value !== 0);
+    let minValue = Math.min(...filteredData)
+    let maxValue = Math.max(...filteredData)
+    let range = maxValue - minValue
+
+    let gradient = elements.chartP.getContext("2d").createLinearGradient(0, pressureChart.chartArea.bottom, 0, pressureChart.chartArea.top)
+
+    let blueStop = Math.max((950 - minValue) / range, 0)
+    let lightblueStop = Math.min(Math.max((970 - minValue) / range, blueStop), 1)
+    let greenStop = Math.min(Math.max((1000 - minValue) / range, lightblueStop), 1)
+    let yellowStop = Math.min(Math.max((1020 - minValue) / range, greenStop), 1)
+    let redStop = Math.min((maxValue - minValue) / range, 1)
+
+    gradient.addColorStop(blueStop, '#4284f5')
+    gradient.addColorStop(lightblueStop, '#42a4f5')
+    gradient.addColorStop(greenStop, 'green')
+    gradient.addColorStop(yellowStop, 'yellow')
+    gradient.addColorStop(redStop, 'red')
+    return gradient
 }
 
 
